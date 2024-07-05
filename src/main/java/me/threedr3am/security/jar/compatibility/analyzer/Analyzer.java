@@ -1,4 +1,4 @@
-package me.threedr3am.security.jar.compatibility.scanner;
+package me.threedr3am.security.jar.compatibility.analyzer;
 
 import me.threedr3am.security.jar.compatibility.config.DetectionOptions;
 import me.threedr3am.security.jar.compatibility.reader.JarReaderSpace;

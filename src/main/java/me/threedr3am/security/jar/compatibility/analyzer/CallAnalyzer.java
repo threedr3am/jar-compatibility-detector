@@ -1,4 +1,4 @@
-package me.threedr3am.security.jar.compatibility.scanner;
+package me.threedr3am.security.jar.compatibility.analyzer;
 
 import lombok.extern.slf4j.Slf4j;
 import me.threedr3am.security.jar.compatibility.reader.ClazzReader;
@@ -11,7 +11,6 @@ import me.threedr3am.security.jar.compatibility.result.CheckType;
 import me.threedr3am.security.jar.compatibility.result.Issue;
 import org.objectweb.asm.*;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,10 +43,10 @@ public class CallAnalyzer implements Analyzer {
     }
 
     private Issue transfer(MethodCall methodCall) {
-        return new Issue("被调用方法不存在: %s.%s-%s".formatted(methodCall.getOwner(), methodCall.getName(), methodCall.getDesc())
+        return new Issue("被调用方法不存在: %s.%s%s".formatted(methodCall.getOwner(), methodCall.getName(), methodCall.getDesc())
                 , "调用点有：\n%s".formatted(
                 methodCall.getCallers().stream()
-                        .map(methodInfo -> "- %s.%s-%s".formatted(methodInfo.getDeclaringClass(), methodInfo.getName(), methodInfo.getDescriptor()))
+                        .map(methodInfo -> "- %s.%s%s <-> %s".formatted(methodInfo.getDeclaringClass(), methodInfo.getName(), methodInfo.getDescriptor(), methodInfo.getJar()))
                         .collect(Collectors.joining("\n"))
         )
         );
@@ -86,7 +85,7 @@ public class CallAnalyzer implements Analyzer {
 
             @Override
             public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-                MethodInfo methodInfo = new MethodInfo(classInfo.getClassName(), access, name, descriptor, signature, exceptions);
+                MethodInfo methodInfo = new MethodInfo(classInfo.getJar(), classInfo.getClassName(), access, name, descriptor, signature, exceptions);
                 classInfo.getMethods().put(name + descriptor, methodInfo);
                 if (isJre) {
                     return super.visitMethod(access, name, descriptor, signature, exceptions);
@@ -145,5 +144,4 @@ public class CallAnalyzer implements Analyzer {
         }
         return existCallee(classInfo.getSuperName(), methodCall);
     }
-
 }
