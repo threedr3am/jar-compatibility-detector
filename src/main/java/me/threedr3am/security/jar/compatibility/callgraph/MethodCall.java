@@ -1,6 +1,7 @@
-package me.threedr3am.security.jar.compatibility.cha;
+package me.threedr3am.security.jar.compatibility.callgraph;
 
 import lombok.Data;
+import me.threedr3am.security.jar.compatibility.cha.MethodInfo;
 import org.objectweb.asm.Type;
 
 import java.util.HashSet;

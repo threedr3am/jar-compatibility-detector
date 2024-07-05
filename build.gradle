@@ -10,6 +10,23 @@ repositories {
 }
 
 dependencies {
+    // Process options
+    implementation("info.picocli:picocli:4.7.3")
+
+    // Logger
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.9'
+    implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.4.13'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.4.13'
+
+    // Use ASM to read Java class files
+    implementation("org.ow2.asm:asm:9.4")
+
+    // lombok
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.30'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.30'
+    testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.30'
+    testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.30'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
@@ -17,3 +34,16 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+task customFatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'me.threedr3am.security.jar.compatibility.Detection'
+    }
+    archiveBaseName = 'CompatibilityDetector'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+project.jar.enabled(false)
+project.build.dependsOn(customFatJar)
+project.assemble.dependsOn(customFatJar)
