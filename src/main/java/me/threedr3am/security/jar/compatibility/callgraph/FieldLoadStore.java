@@ -7,15 +7,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-public class FieldLoad {
+public class FieldLoadStore {
 
-    private Set<MethodInfo> loaders = new HashSet<>();
+    private Set<MethodInfo> loadStores = new HashSet<>();
 
     private final String owner;
     private final String field;
     private final String type;
 
-    public FieldLoad(String owner, String field, String type) {
+    public FieldLoadStore(String owner, String field, String type) {
         this.owner = owner;
         this.field = field;
         this.type = type;

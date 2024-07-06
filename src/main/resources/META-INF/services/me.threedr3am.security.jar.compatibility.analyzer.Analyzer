@@ -1,2 +1,2 @@
-me.threedr3am.security.jar.compatibility.analyzer.CallAnalyzer
-me.threedr3am.security.jar.compatibility.analyzer.LoadAnalyzer
+me.threedr3am.security.jar.compatibility.analyzer.MethodCallAnalyzer
+me.threedr3am.security.jar.compatibility.analyzer.FieldLoadStoreAnalyzer

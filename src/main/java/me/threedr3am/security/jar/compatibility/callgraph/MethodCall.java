@@ -28,12 +28,4 @@ public class MethodCall {
             this.argumentTypes[i] = argTypes[i].getClassName();
         }
     }
-
-    @Override
-    public String toString() {
-        return String.format("%s.%s(%s)",
-                owner,
-                name,
-                desc);
-    }
 }
