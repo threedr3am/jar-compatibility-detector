@@ -17,11 +17,12 @@ public class Detection {
         DetectionOptions options = DetectionOptions.parse(args);
         JarReaderSpace jarReaderSpace = new JarReaderSpace();
         jarReaderSpace.read(options);
+        World world = WorldBuilder.build(jarReaderSpace, options);
         ServiceLoader<Analyzer> analyzerServiceLoader = ServiceLoader.load(Analyzer.class);
         Iterator<Analyzer> analyzerIterator = analyzerServiceLoader.iterator();
         while (analyzerIterator.hasNext()) {
             Analyzer analyzer = analyzerIterator.next();
-            analyzer.init(jarReaderSpace, options);
+            analyzer.init(world);
             List<Issue> issues = analyzer.analyze();
             issues.forEach(issue -> log.info("""
             ------------------------------------------------------------------------------------------------------
