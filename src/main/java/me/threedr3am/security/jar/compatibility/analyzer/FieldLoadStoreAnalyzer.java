@@ -3,6 +3,7 @@ package me.threedr3am.security.jar.compatibility.analyzer;
 import lombok.extern.slf4j.Slf4j;
 import me.threedr3am.security.jar.compatibility.World;
 import me.threedr3am.security.jar.compatibility.callgraph.FieldLoadStore;
+import me.threedr3am.security.jar.compatibility.callgraph.MethodCall;
 import me.threedr3am.security.jar.compatibility.cha.ClassInfo;
 import me.threedr3am.security.jar.compatibility.cha.MethodInfo;
 import me.threedr3am.security.jar.compatibility.result.CheckType;
@@ -24,7 +25,8 @@ public class FieldLoadStoreAnalyzer implements Analyzer {
     @Override
     public List<Issue> analyze() {
         Set<FieldLoadStore> noExistCalls = world.getFieldLoadStores().values().stream()
-                .filter(fieldLoadStore -> world.getOptions().getPkg() == null || isTargetLoad(world.getOptions().getPkg(), fieldLoadStore))
+                .filter(fieldLoadStore -> world.getOptions().getPkg() == null || isTargetLoadStore(world.getOptions().getPkg(), fieldLoadStore))
+                .filter(fieldLoadStore -> world.getOptions().getJar() == null || isTargetJarLoadStore(world.getOptions().getJar(), fieldLoadStore))
                 .filter(fieldLoadStore -> !existField(fieldLoadStore.getOwner(), fieldLoadStore))
                 .collect(Collectors.toSet());
         if (noExistCalls.isEmpty()) {
@@ -49,12 +51,38 @@ public class FieldLoadStoreAnalyzer implements Analyzer {
     }
 
 
-    private boolean isTargetLoad(String pkg, FieldLoadStore fieldLoadStore) {
-        if (fieldLoadStore.getOwner().equals(pkg)) {
+    private boolean isTargetLoadStore(String pkg, FieldLoadStore fieldLoadStore) {
+        if (fieldLoadStore.getOwner().startsWith(pkg)) {
             return true;
         }
         for (MethodInfo loader : fieldLoadStore.getLoadStores()) {
             if (loader.getDeclaringClass().startsWith(pkg)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isTargetJarLoadStore(String optionJar, FieldLoadStore fieldLoadStore) {
+        ClassInfo ownClass = world.getClass(fieldLoadStore.getOwner());
+        if (ownClass != null && matchJar(ownClass.getJar(), optionJar)) {
+            return true;
+        }
+        for (MethodInfo loadStore : fieldLoadStore.getLoadStores()) {
+            if (matchJar(loadStore.getJar(), optionJar)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean matchJar(String jar, String optionJar) {
+        if (optionJar.startsWith("/")) {
+            if (optionJar.equals(jar)) {
+                return true;
+            }
+        } else {
+            if (jar.endsWith(optionJar)) {
                 return true;
             }
         }

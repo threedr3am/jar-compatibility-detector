@@ -22,6 +22,7 @@ java -jar CompatibilityDetector-1.0-SNAPSHOT.jar --target <path> --javaVersion <
 - `--target <path>`: 指定需要分析的JAR包或包含JAR包的目录的路径。
 - `--javaVersion <version>`: 指定工具使用的JRE版本。可取值为3、4、5、6、7、8。
 - `--package <package>`: 指定需要特别关注的目标包。例如，如果您想检测`logback`的兼容性，可以使用`--package ch.qos.logback`。
+- `--jar <jar>`: 指定需要特别关注的目标jar。例如，如果您想检测`logback.jar`的兼容性，可以使用`--jar /path/to/jars/logback.jar`。
 
 ## 示例
 
@@ -29,6 +30,10 @@ java -jar CompatibilityDetector-1.0-SNAPSHOT.jar --target <path> --javaVersion <
 
 ```bash
 java -jar CompatibilityDetector.jar --target /path/to/jars --javaVersion 8 --package ch.qos.logback
+```
+or
+```bash
+java -jar CompatibilityDetector.jar --target /path/to/jars --javaVersion 8 --jar /path/to/jars/logback.jar
 ```
 
 ## 兼容性分析

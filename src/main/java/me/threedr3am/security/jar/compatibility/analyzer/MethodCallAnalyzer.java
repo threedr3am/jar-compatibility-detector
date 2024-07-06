@@ -27,7 +27,8 @@ public class MethodCallAnalyzer implements Analyzer {
     @Override
     public List<Issue> analyze() {
         Set<MethodCall> noExistCalls = world.getMethodCalls().values().stream()
-                .filter(methodCall -> world.getOptions().getPkg() == null || isTargetCall(world.getOptions().getPkg(), methodCall))
+                .filter(methodCall -> world.getOptions().getPkg() == null || isTargetPackageCall(world.getOptions().getPkg(), methodCall))
+                .filter(methodCall -> world.getOptions().getJar() == null || isTargetJarCall(world.getOptions().getJar(), methodCall))
                 .filter(methodCall -> !existCallee(methodCall.getOwner(), methodCall))
                 .collect(Collectors.toSet());
         if (noExistCalls.isEmpty()) {
@@ -51,12 +52,38 @@ public class MethodCallAnalyzer implements Analyzer {
         return CheckType.MethodCall;
     }
 
-    private boolean isTargetCall(String pkg, MethodCall methodCall) {
-        if (methodCall.getOwner().equals(pkg)) {
+    private boolean isTargetPackageCall(String pkg, MethodCall methodCall) {
+        if (methodCall.getOwner().startsWith(pkg)) {
             return true;
         }
         for (MethodInfo caller : methodCall.getCallers()) {
             if (caller.getDeclaringClass().startsWith(pkg)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isTargetJarCall(String optionJar, MethodCall methodCall) {
+        ClassInfo ownClass = world.getClass(methodCall.getOwner());
+        if (ownClass != null && matchJar(ownClass.getJar(), optionJar)) {
+            return true;
+        }
+        for (MethodInfo caller : methodCall.getCallers()) {
+            if (matchJar(caller.getJar(), optionJar)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean matchJar(String jar, String optionJar) {
+        if (optionJar.startsWith("/")) {
+            if (optionJar.equals(jar)) {
+                return true;
+            }
+        } else {
+            if (jar.endsWith(optionJar)) {
                 return true;
             }
         }

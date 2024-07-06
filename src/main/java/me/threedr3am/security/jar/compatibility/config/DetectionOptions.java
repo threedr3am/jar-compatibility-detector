@@ -9,17 +9,20 @@ import picocli.CommandLine.Option;
 @Command(name = "Detection", mixinStandardHelpOptions = true)
 public class DetectionOptions {
 
-    @Option(names = {"-t", "--target"}, description = "Target jar or dir to detect", required = true)
+    @Option(names = {"-t", "--target"}, description = "Target jar or dir to detect compatibility", required = true)
     private String target;
 
     @Option(names = {"-o", "--output"}, description = "Output file")
     private String output;
 
-    @Option(names = {"-j", "--javaVersion"}, description = "Target java version to detect", defaultValue = "8")
+    @Option(names = {"-jv", "--javaVersion"}, description = "Target jars need jre(java version:3,4,5,6,7,8) to detect", defaultValue = "8")
     private int javaVersion;
 
-    @Option(names = {"-p", "--package"}, description = "Target java root package to detect")
+    @Option(names = {"-p", "--package"}, description = "Extract target package detection result")
     private String pkg;
+
+    @Option(names = {"-j", "--jar"}, description = "Extract target jar detection result")
+    private String jar;
 
     public static DetectionOptions parse(String... args) {
         DetectionOptions options = CommandLine.populateCommand(new DetectionOptions(), args);
