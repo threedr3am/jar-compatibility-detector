@@ -61,5 +61,3 @@ java -jar CompatibilityDetector.jar --target /path/to/jars --javaVersion 8 --jar
 ---
 **Jar兼容性检测工具** - 确保您的Java项目兼容性无误
 ```
-
-请根据您的实际工具名称和细节，适当修改上述模板中的占位符和示例命令。如果需要包含许可证文件，请确保在项目根目录下创建一个名为`LICENSE`的文件，并填入相应的许可证文本。
