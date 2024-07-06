@@ -1,6 +1,7 @@
 package me.threedr3am.security.jar.compatibility;
 
 import lombok.Data;
+import me.threedr3am.security.jar.compatibility.callgraph.AnnotationReference;
 import me.threedr3am.security.jar.compatibility.callgraph.FieldLoadStore;
 import me.threedr3am.security.jar.compatibility.callgraph.MethodCall;
 import me.threedr3am.security.jar.compatibility.cha.ClassInfo;
@@ -15,6 +16,7 @@ public class World {
     private final HashMap<String, ClassInfo> classes = new HashMap<>();
     private final Map<String, MethodCall> methodCalls = new HashMap<>();
     private final Map<String, FieldLoadStore> fieldLoadStores = new HashMap<>();
+    private final Map<String, AnnotationReference> annotationReferences = new HashMap<>();
     private final DetectionOptions options;
 
     public World(DetectionOptions options) {
@@ -33,6 +35,10 @@ public class World {
         return fieldLoadStores.get(name);
     }
 
+    public AnnotationReference getAnnotationReferences(String name) {
+        return annotationReferences.get(name);
+    }
+
     public void registerClass(String name, ClassInfo classInfo) {
         classes.put(name, classInfo);
     }
@@ -43,5 +49,9 @@ public class World {
 
     public FieldLoadStore registerFieldLoadStore(String name, FieldLoadStore fieldLoadStore) {
         return fieldLoadStores.computeIfAbsent(name, k -> fieldLoadStore);
+    }
+
+    public AnnotationReference registerAnnotationReference(String name, AnnotationReference annotationReference) {
+        return annotationReferences.computeIfAbsent(name, k -> annotationReference);
     }
 }

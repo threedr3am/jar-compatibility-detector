@@ -24,15 +24,15 @@ public class FieldLoadStoreAnalyzer implements Analyzer {
 
     @Override
     public List<Issue> analyze() {
-        Set<FieldLoadStore> noExistCalls = world.getFieldLoadStores().values().stream()
+        Set<FieldLoadStore> noExistLoadStores = world.getFieldLoadStores().values().stream()
                 .filter(fieldLoadStore -> world.getOptions().getPkg() == null || isTargetLoadStore(world.getOptions().getPkg(), fieldLoadStore))
                 .filter(fieldLoadStore -> world.getOptions().getJar() == null || isTargetJarLoadStore(world.getOptions().getJar(), fieldLoadStore))
                 .filter(fieldLoadStore -> !existField(fieldLoadStore.getOwner(), fieldLoadStore))
                 .collect(Collectors.toSet());
-        if (noExistCalls.isEmpty()) {
+        if (noExistLoadStores.isEmpty()) {
             return Collections.emptyList();
         }
-        return noExistCalls.stream().map(this::transfer).collect(Collectors.toList());
+        return noExistLoadStores.stream().map(this::transfer).collect(Collectors.toList());
     }
 
     private Issue transfer(FieldLoadStore fieldLoadStore) {

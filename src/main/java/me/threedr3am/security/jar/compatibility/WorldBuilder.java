@@ -1,10 +1,12 @@
 package me.threedr3am.security.jar.compatibility;
 
+import me.threedr3am.security.jar.compatibility.callgraph.AnnotationReference;
 import me.threedr3am.security.jar.compatibility.callgraph.FieldLoadStore;
 import me.threedr3am.security.jar.compatibility.callgraph.MethodCall;
 import me.threedr3am.security.jar.compatibility.cha.ClassInfo;
 import me.threedr3am.security.jar.compatibility.cha.FieldInfo;
 import me.threedr3am.security.jar.compatibility.cha.MethodInfo;
+import me.threedr3am.security.jar.compatibility.cha.ParameterInfo;
 import me.threedr3am.security.jar.compatibility.config.DetectionOptions;
 import me.threedr3am.security.jar.compatibility.reader.ClazzReader;
 import me.threedr3am.security.jar.compatibility.reader.JarReaderSpace;
@@ -47,11 +49,33 @@ public class WorldBuilder {
             }
 
             @Override
+            public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+                if (isJre) {
+                    return super.visitAnnotation(descriptor, visible);
+                }
+                String annotationName = Type.getType(descriptor).getClassName();
+                AnnotationReference annotationReference = world.registerAnnotationReference(annotationName, new AnnotationReference(annotationName));
+                annotationReference.getReferencedClasses().add(classInfo);
+                return super.visitAnnotation(descriptor, visible);
+            }
+
+            @Override
             public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-                Type fieldType = Type.getObjectType(descriptor);
+                Type fieldType = Type.getType(descriptor);
                 FieldInfo fieldInfo = new FieldInfo(classInfo.getJar(), classInfo.getClassName(), access, name, fieldType.getClassName(), signature, value);
                 classInfo.getFields().put(fieldInfo.getName(), fieldInfo);
-                return super.visitField(access, name, fieldType.getClassName(), signature, value);
+                if (isJre) {
+                    return super.visitField(access, name, descriptor, signature, value);
+                }
+                return new FieldVisitor(Opcodes.ASM9) {
+                    @Override
+                    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+                        String annotationName = Type.getType(descriptor).getClassName();
+                        AnnotationReference annotationReference = world.registerAnnotationReference(annotationName, new AnnotationReference(annotationName));
+                        annotationReference.getReferencedFields().add(fieldInfo);
+                        return super.visitAnnotation(descriptor, visible);
+                    }
+                };
             }
 
             @Override
@@ -60,6 +84,11 @@ public class WorldBuilder {
                 classInfo.getMethods().put(name + descriptor, methodInfo);
                 if (isJre) {
                     return super.visitMethod(access, name, descriptor, signature, exceptions);
+                }
+                Type[] argTypes = Type.getArgumentTypes(descriptor);
+                for (int i = 0; i < argTypes.length; i++) {
+                    ParameterInfo parameterInfo = new ParameterInfo(classInfo.getJar(), classInfo.getClassName(), name, descriptor, i, argTypes[i].getClassName());
+                    methodInfo.getParameters().put(i, parameterInfo);
                 }
                 return new MethodVisitor(Opcodes.ASM9, super.visitMethod(access, name, descriptor, signature, exceptions)) {
                     @Override
@@ -78,13 +107,30 @@ public class WorldBuilder {
                     @Override
                     public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
                         Type ownerType = Type.getObjectType(owner);
-                        Type fieldType = Type.getObjectType(descriptor);
+                        Type fieldType = Type.getType(descriptor);
 
                         String fieldName = ownerType.getClassName() + "." + name;
                         FieldLoadStore fieldLoadStore = world.registerFieldLoadStore(fieldName,
                                 new FieldLoadStore(ownerType.getClassName(), name, fieldType.getClassName()));
                         fieldLoadStore.getLoadStores().add(methodInfo);
                         super.visitFieldInsn(opcode, owner, name, descriptor);
+                    }
+
+                    @Override
+                    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+                        String annotationName = Type.getType(descriptor).getClassName();
+                        AnnotationReference annotationReference = world.registerAnnotationReference(annotationName, new AnnotationReference(annotationName));
+                        annotationReference.getReferencedMethods().add(methodInfo);
+                        return super.visitAnnotation(descriptor, visible);
+                    }
+
+                    @Override
+                    public AnnotationVisitor visitParameterAnnotation(int parameter, String descriptor, boolean visible) {
+                        ParameterInfo parameterInfo = methodInfo.getParameters().get(parameter);
+                        String annotationName = Type.getType(descriptor).getClassName();
+                        AnnotationReference annotationReference = world.registerAnnotationReference(annotationName, new AnnotationReference(annotationName));
+                        annotationReference.getReferencedParameters().add(parameterInfo);
+                        return super.visitParameterAnnotation(parameter, descriptor, visible);
                     }
                 };
             }
