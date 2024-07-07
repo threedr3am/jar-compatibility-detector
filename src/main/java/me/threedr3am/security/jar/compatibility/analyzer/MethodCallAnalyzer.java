@@ -43,8 +43,7 @@ public class MethodCallAnalyzer implements Analyzer {
                 methodCall.getCallers().stream()
                         .map(methodInfo -> "- %s.%s%s <-> %s".formatted(methodInfo.getDeclaringClass(), methodInfo.getName(), methodInfo.getDescriptor(), methodInfo.getJar()))
                         .collect(Collectors.joining("\n"))
-        )
-        );
+        ), type());
     }
 
     @Override

@@ -41,8 +41,7 @@ public class FieldLoadStoreAnalyzer implements Analyzer {
                 fieldLoadStore.getLoadStores().stream()
                         .map(loader -> "- %s.%s%s <-> %s".formatted(loader.getDeclaringClass(), loader.getName(), loader.getDescriptor(), loader.getJar()))
                         .collect(Collectors.joining("\n"))
-        )
-        );
+        ), type());
     }
 
     @Override

@@ -8,13 +8,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Issue {
 
     private final String id;
-    private String title;
-    private String description;
+    private final String title;
+    private final String description;
+    private final CheckType checkType;
     private static AtomicInteger counter = new AtomicInteger(1);
 
-    public Issue(String title, String description) {
+    public Issue(String title, String description, CheckType checkType) {
         this.id = counter.getAndIncrement() + "";
         this.title = title;
         this.description = description;
+        this.checkType = checkType;
     }
 }

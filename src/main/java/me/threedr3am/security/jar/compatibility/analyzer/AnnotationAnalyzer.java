@@ -61,7 +61,7 @@ public class AnnotationAnalyzer implements Analyzer {
                     .map(parameterInfo -> "- parameter: %s.%s%s->%d <-> %s".formatted(parameterInfo.getDeclaringClass(), parameterInfo.getMethodName(), parameterInfo.getMethodDesc(), parameterInfo.getIndex(), parameterInfo.getJar()))
                     .collect(Collectors.joining("\n")));
         }
-        return new Issue(title, descriptionSB.toString());
+        return new Issue(title, descriptionSB.toString(), type());
     }
 
     @Override

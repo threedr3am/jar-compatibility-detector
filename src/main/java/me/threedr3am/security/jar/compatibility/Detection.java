@@ -27,9 +27,10 @@ public class Detection {
             issues.forEach(issue -> log.info("""
             ------------------------------------------------------------------------------------------------------
             id: {}
+            type: {}
             title: {}
             description: {}
-            """, issue.getId(), issue.getTitle(), issue.getDescription()));
+            """, issue.getId(), issue.getCheckType().toString(), issue.getTitle(), issue.getDescription()));
         }
     }
 }
